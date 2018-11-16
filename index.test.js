@@ -65,10 +65,10 @@ describe('normal requests', () => {
     .expect(200)
     );
 
-  test('should return time in seconds Server-Timing metrics', async () =>
+  test('should return time in ms Server-Timing metrics', async () =>
     await request(server)
     .get('/')
-    .expect('Server-Timing', /total;dur=1\./)
+    .expect('Server-Timing', /total;dur=1\d{3}\./)
     .expect(200)
     );
 });
