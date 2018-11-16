@@ -5,6 +5,11 @@ function getSlug(str) {
   return str.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z-]/g, '');
 }
 
+function convertToMs(hrtime) {
+  const ms = hrtime[0] * 1e3 + hrtime[1] * 1e-6;
+  return ms.toFixed(3);
+}
+
 module.exports = ({ total } = { total: process.env.NODE_ENV !== 'production' }) => async (ctx, next) => {
   // attaching timings object to state
   ctx.state.timings = {
@@ -35,10 +40,10 @@ module.exports = ({ total } = { total: process.env.NODE_ENV !== 'production' }) 
 
   // constructing headers array
   const metrics = [];
-  for (const [key, { stop: [ sec, nanosec ], desc }] of ctx.state.timings.all) {
-    metrics.push(`${key};dur=${sec}.${(nanosec / 1000000).toFixed(0).substr(0, 2)}${desc.length && key !== desc ? `;desc="${desc}"` : ''}`);
+  for (const [key, { stop, desc }] of ctx.state.timings.all) {
+    metrics.push(`${key};dur=${convertToMs(stop)}${desc.length && key !== desc ? `;desc="${desc}"`: ''}`);
   }
 
   // Adding our headers now
-  if (metrics.length) ctx.append('Server-Timing', metrics.join(', '));
+  if (metrics.length) ctx.append('Server-Timing', metrics.join(','));
 };
